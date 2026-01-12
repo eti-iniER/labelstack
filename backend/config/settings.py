@@ -152,6 +152,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API documentation for Labelstack",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "CAMELIZE_NAMES": True,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
+        "drf_spectacular.hooks.postprocess_schema_enums",
+    ],
 }
 
 PHONENUMBER_DEFAULT_REGION = "US"
