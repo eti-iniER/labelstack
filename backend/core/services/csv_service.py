@@ -2,6 +2,8 @@ import abc
 import polars as pl
 from typing import List, Tuple
 from django.core.files.uploadedfile import UploadedFile
+from core.models import Order, OrderParty, Package, Address
+from core.utils import lbs_oz_to_oz
 
 VALID_CSV_HEADERS = [
     "from_first_name",
@@ -107,7 +109,19 @@ class CSVService:
 
         try:
             uploaded_csv_file.seek(0)
-            self.df = pl.read_csv(uploaded_csv_file.file, skip_rows=1)
+            schema_overrides = {
+                "zip/postal code": pl.Utf8,
+                "zip/postal code_duplicated_0": pl.Utf8,
+                "phone num1": pl.Utf8,
+                "phone num2": pl.Utf8,
+                "order no": pl.Utf8,
+                "item-sku": pl.Utf8,
+            }
+            self.df = pl.read_csv(
+                uploaded_csv_file.file,
+                skip_rows=1,
+                schema_overrides=schema_overrides,
+            )
             self.df.columns = [
                 col.strip().lower().replace("*", "") for col in self.df.columns
             ]
@@ -145,3 +159,96 @@ class CSVService:
         """
         csv_validator = CSVValidator([])
         return csv_validator.validate(self.df)
+
+    def create_orders(self) -> List[Order]:
+        """
+        Create Order instances from the validated CSV data.
+        """
+        from_addresses = []
+        to_addresses = []
+        senders = []
+        recipients = []
+        packages = []
+
+        for row in self.df.iter_rows(named=True):
+            from_name = (
+                f"{row['from_first_name'] or ''} {row['from_last_name'] or ''}".strip()
+            )
+            from_addresses.append(
+                Address(
+                    name=from_name,
+                    address=row["from_address"],
+                    address_2=row["from_address_2"] or "",
+                    city=row["from_city"],
+                    state=row["from_state"],
+                    zip_code=row["from_zip_code"],
+                    is_user_created=False,
+                )
+            )
+
+            to_name = (
+                f"{row['to_first_name'] or ''} {row['to_last_name'] or ''}".strip()
+            )
+            to_addresses.append(
+                Address(
+                    name=to_name,
+                    address=row["to_address"],
+                    address_2=row["to_address_2"] or "",
+                    city=row["to_city"],
+                    state=row["to_state"],
+                    zip_code=row["to_zip_code"],
+                    is_user_created=False,
+                )
+            )
+
+            senders.append(
+                OrderParty(
+                    first_name=row["from_first_name"],
+                    last_name=row["from_last_name"] or "",
+                )
+            )
+
+            recipients.append(
+                OrderParty(
+                    first_name=row["to_first_name"],
+                    last_name=row["to_last_name"] or "",
+                )
+            )
+
+            weight_lbs = int(row["weight_lbs"]) if row["weight_lbs"] else 0
+            weight_oz = int(row["weight_oz"]) if row["weight_oz"] else 0
+            total_weight_oz = lbs_oz_to_oz(weight_lbs, weight_oz)
+
+            packages.append(
+                Package(
+                    length=int(row["length"]),
+                    width=int(row["width"]),
+                    height=int(row["height"]),
+                    weight=total_weight_oz,
+                    item_sku=row["item_sku"] or "",
+                    is_user_created=False,
+                )
+            )
+
+        from_addresses = Address.objects.bulk_create(from_addresses)
+        to_addresses = Address.objects.bulk_create(to_addresses)
+        senders = OrderParty.objects.bulk_create(senders)
+        recipients = OrderParty.objects.bulk_create(recipients)
+        packages = Package.objects.bulk_create(packages)
+
+        orders = []
+        for i, row in enumerate(self.df.iter_rows(named=True)):
+            orders.append(
+                Order(
+                    sender=senders[i],
+                    recipient=recipients[i],
+                    from_address=from_addresses[i],
+                    to_address=to_addresses[i],
+                    package=packages[i],
+                    phone_number=row["phone_number"] or "",
+                    phone_number_2=row["phone_number_2"] or "",
+                )
+            )
+
+        order_instances = Order.objects.bulk_create(orders)
+        return order_instances

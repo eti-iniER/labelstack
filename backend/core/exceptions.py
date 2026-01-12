@@ -7,6 +7,7 @@ from rest_framework.exceptions import APIException
 
 class ErrorCode(StrEnum):
     SERVER_ERROR = "SERVER_ERROR"
+    CSV_VALIDATION_ERROR = "CSV_VALIDATION_ERROR"
 
 
 class AppException(APIException):
