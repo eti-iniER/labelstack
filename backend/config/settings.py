@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "drf_spectacular",
+    "phonenumber_field",
     # Local apps
     "core",
     "api",
@@ -152,3 +153,5 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+PHONENUMBER_DEFAULT_REGION = "US"
