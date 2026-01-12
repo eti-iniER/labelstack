@@ -11,5 +11,16 @@ dependencies = [
     "djangorestframework>=3.16.1",
     "djangorestframework-camel-case>=1.4.2",
     "drf-spectacular>=0.29.0",
+    "polars>=1.37.0",
     "python-decouple>=3.8",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-django>=4.11.1",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
