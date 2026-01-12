@@ -14,3 +14,10 @@ export interface Order {
   createdAt: ISODateString;
   package: Package;
 }
+
+export type OrderFilters = Partial<{
+  senderName: string;
+  recipientName: string;
+  fromAddress: string;
+  toAddress: string;
+}>;
