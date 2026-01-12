@@ -29,8 +29,14 @@ SECRET_KEY = config(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")]
+)
+CORS_EXPOSE_HEADERS = ["Content-Disposition"]
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS", cast=lambda v: [s.strip() for s in v.split(",")]
+)
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -65,7 +71,6 @@ MIDDLEWARE = [
     "djangorestframework_camel_case.middleware.CamelCaseMiddleWare",
 ]
 
-CORS_EXPOSE_HEADERS = ["Content-Disposition"]
 
 ROOT_URLCONF = "config.urls"
 
