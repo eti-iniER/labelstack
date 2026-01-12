@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "drf_spectacular",
     "phonenumber_field",
+    "django_filters",
     # Local apps
     "core",
     "api",
@@ -138,6 +139,10 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
         "djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer",
     ),
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+    ],
     "EXCEPTION_HANDLER": "api.exceptions.handler",
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
