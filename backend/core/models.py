@@ -1,5 +1,6 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from core.querysets import OrderQuerySet, AddressQuerySet, PackageQuerySet
 
 # Create your models here.
 
@@ -19,16 +20,23 @@ class Address(models.Model):
     def __str__(self):
         return f"{self.name} - {self.address}"
 
+    objects = AddressQuerySet.as_manager()
+
 
 class Package(models.Model):
     length = models.PositiveIntegerField()
     width = models.PositiveIntegerField()
     height = models.PositiveIntegerField()
-    weight = models.PositiveIntegerField()
+    weight = models.PositiveIntegerField()  # weight in OUNCES
     item_sku = models.CharField(max_length=255, blank=True)
     is_user_created = models.BooleanField(
         default=False
     )  # Indicates if the package was manually saved by the user
+
+    def __str__(self):
+        return f"Package {self.id} - {self.weight} oz"
+
+    objects = PackageQuerySet.as_manager()
 
 
 class OrderParty(models.Model):
@@ -62,3 +70,5 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     phone_number = PhoneNumberField()
     phone_number_2 = PhoneNumberField(blank=True)
+
+    objects = OrderQuerySet.as_manager()
