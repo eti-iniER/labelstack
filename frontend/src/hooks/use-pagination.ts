@@ -10,7 +10,7 @@ interface UsePaginationOptions {
 
 export function usePagination({
   initialPage = 1,
-  initialPageSize = 20,
+  initialPageSize = 50,
   debounceDuration = 0,
 }: UsePaginationOptions = {}) {
   const [currentPage, setCurrentPage] = useState(initialPage);
