@@ -10,6 +10,8 @@ import { Dashboard } from "@/app/dashboard";
 import { Orders } from "@/app/dashboard/orders";
 import { PageNotFound } from "@/app/error-pages/page-not-found";
 
+const queryClient = new QueryClient();
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -27,17 +29,15 @@ const AppRoutes = () => {
 };
 
 function App() {
-  const client = new QueryClient();
-
   return (
-    <QueryClientProvider client={client}>
-      <TooltipProvider>
-        <Toaster position="top-right" richColors />
-        <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster position="top-right" richColors />
           <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 
