@@ -4,5 +4,6 @@ export {
   useMultiPageForm,
   useMultiPageFormContext,
 } from "./use-multi-page-form";
-export type { MultiPageFormStep, MultiPageFormContextValue } from "./context";
+export type { MultiPageFormContextValue } from "./context";
+export type { MultiPageFormStep } from "./types";
 export type { UseMultiPageFormOptions } from "./use-multi-page-form";

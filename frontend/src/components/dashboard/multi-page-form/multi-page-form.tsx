@@ -1,25 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AnimatePresence, motion } from "motion/react";
 import { MultiPageFormProvider } from "./provider";
-import {
-  useMultiPageForm,
-  type UseMultiPageFormOptions,
-} from "./use-multi-page-form";
+import type { MultiPageFormContextValue } from "./context";
 import { ConnectedStepper, type StepperStep } from "../stepper";
 import { cn } from "@/lib/utils";
 
-interface MultiPageFormProps extends UseMultiPageFormOptions {
+interface MultiPageFormProps<TData = any> {
+  form: MultiPageFormContextValue<TData>;
   stepperSteps?: StepperStep[];
   className?: string;
 }
 
-export function MultiPageForm({
-  steps,
+export function MultiPageForm<TData = any>({
+  form,
   stepperSteps,
-  onComplete,
   className,
-}: MultiPageFormProps) {
-  const formContext = useMultiPageForm({ steps, onComplete });
-  const CurrentStepComponent = steps[formContext.currentStep]?.component;
+}: MultiPageFormProps<TData>) {
+  const CurrentStepComponent = form.steps[form.currentStep]?.component;
 
   if (!CurrentStepComponent) {
     return null;
@@ -41,17 +38,17 @@ export function MultiPageForm({
   };
 
   return (
-    <MultiPageFormProvider value={formContext}>
-      <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
+    <MultiPageFormProvider value={form}>
+      <div className={cn("flex min-h-0 flex-1 flex-col p-4", className)}>
         {stepperSteps && (
-          <div className="mb-4">
+          <div className="mb-4 max-w-4xl self-center">
             <ConnectedStepper steps={stepperSteps} />
           </div>
         )}
-        <AnimatePresence mode="wait" custom={formContext.direction}>
+        <AnimatePresence mode="wait" custom={form.direction}>
           <motion.div
-            key={formContext.currentStep}
-            custom={formContext.direction}
+            key={form.currentStep}
+            custom={form.direction}
             variants={variants}
             initial="enter"
             animate="center"

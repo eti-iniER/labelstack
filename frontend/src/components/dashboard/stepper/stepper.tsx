@@ -12,6 +12,7 @@ export interface StepperStep {
 interface StepperProps {
   steps: StepperStep[];
   currentStep?: number;
+  maxStepReached?: number;
   onStepClick?: (stepIndex: number) => void;
   className?: string;
 }
@@ -19,10 +20,12 @@ interface StepperProps {
 export function Stepper({
   steps,
   currentStep: controlledCurrentStep,
+  maxStepReached: controlledMaxStepReached,
   onStepClick,
   className,
 }: StepperProps) {
   const currentStep = controlledCurrentStep ?? 0;
+  const maxStepReached = controlledMaxStepReached ?? currentStep;
 
   return (
     <div className={cn("w-full", className)}>
@@ -30,84 +33,78 @@ export function Stepper({
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
-          const isClickable = onStepClick && index <= currentStep;
+          const isClickable = onStepClick && index <= maxStepReached;
+          const isLastStep = index === steps.length - 1;
 
           return (
             <li
               key={step.id}
-              className={cn(
-                "flex w-full items-center",
-                index < steps.length - 1 && "flex-1",
-              )}
+              className={cn("flex items-center", !isLastStep && "flex-1")}
             >
-              <div className="flex w-full items-center">
-                <button
-                  type="button"
-                  onClick={() => isClickable && onStepClick(index)}
-                  disabled={!isClickable}
+              <button
+                type="button"
+                onClick={() => isClickable && onStepClick(index)}
+                disabled={!isClickable}
+                className={cn(
+                  "group flex shrink-0 items-center gap-2.5 transition-opacity",
+                  isClickable && "cursor-pointer hover:opacity-80",
+                  !isClickable && "cursor-default",
+                )}
+              >
+                <div
                   className={cn(
-                    "group flex items-center gap-2.5 transition-opacity",
-                    isClickable && "cursor-pointer hover:opacity-80",
-                    !isClickable && "cursor-default",
+                    "flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-all",
+                    isCompleted &&
+                      "bg-primary border-primary text-primary-foreground",
+                    isCurrent &&
+                      "border-primary text-primary bg-primary/10 dark:bg-primary/20",
+                    !isCompleted &&
+                      !isCurrent &&
+                      "border-muted-foreground/30 text-muted-foreground bg-muted/50",
                   )}
                 >
-                  <div
+                  {isCompleted ? (
+                    <FiCheck className="size-3.5" />
+                  ) : (
+                    <step.icon className="size-3.5" />
+                  )}
+                </div>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span
                     className={cn(
-                      "flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-all",
-                      isCompleted &&
-                        "bg-primary border-primary text-primary-foreground",
-                      isCurrent &&
-                        "border-primary text-primary bg-primary/10 dark:bg-primary/20",
-                      !isCompleted &&
-                        !isCurrent &&
-                        "border-muted-foreground/30 text-muted-foreground bg-muted/50",
+                      "text-xs font-medium whitespace-nowrap transition-colors",
+                      isCurrent && "text-foreground",
+                      isCompleted && "text-foreground",
+                      !isCompleted && !isCurrent && "text-muted-foreground",
                     )}
                   >
-                    {isCompleted ? (
-                      <FiCheck className="size-3.5" />
-                    ) : (
-                      <step.icon className="size-3.5" />
-                    )}
-                  </div>
-                  <div className="flex flex-col items-start gap-0.5">
+                    {step.text}
+                  </span>
+                  {step.description && (
                     <span
                       className={cn(
-                        "text-xs font-medium whitespace-nowrap transition-colors",
-                        isCurrent && "text-foreground",
-                        isCompleted && "text-foreground",
-                        !isCompleted && !isCurrent && "text-muted-foreground",
+                        "text-[11px] leading-tight whitespace-nowrap transition-colors",
+                        isCurrent && "text-muted-foreground",
+                        isCompleted && "text-muted-foreground",
+                        !isCompleted &&
+                          !isCurrent &&
+                          "text-muted-foreground/70",
                       )}
                     >
-                      {step.text}
+                      {step.description}
                     </span>
-                    {step.description && (
-                      <span
-                        className={cn(
-                          "text-[11px] leading-tight whitespace-nowrap transition-colors",
-                          isCurrent && "text-muted-foreground",
-                          isCompleted && "text-muted-foreground",
-                          !isCompleted &&
-                            !isCurrent &&
-                            "text-muted-foreground/70",
-                        )}
-                      >
-                        {step.description}
-                      </span>
-                    )}
-                  </div>
-                </button>
+                  )}
+                </div>
+              </button>
 
-                {index < steps.length - 1 && (
-                  <div
-                    className={cn(
-                      "mx-4 h-0.5 flex-1 transition-colors",
-                      index < currentStep
-                        ? "bg-primary"
-                        : "bg-gray-300 dark:bg-gray-700",
-                    )}
-                  />
-                )}
-              </div>
+              {!isLastStep && (
+                <div
+                  className={cn(
+                    "mx-4 h-0.5 min-w-8 flex-1 transition-colors",
+                    isCompleted ? "bg-primary" : "bg-border",
+                  )}
+                />
+              )}
             </li>
           );
         })}
@@ -119,13 +116,14 @@ export function Stepper({
 export function ConnectedStepper({
   steps,
   className,
-}: Omit<StepperProps, "currentStep" | "onStepClick">) {
-  const { currentStep, goToStep } = useMultiPageFormContext();
+}: Omit<StepperProps, "currentStep" | "maxStepReached" | "onStepClick">) {
+  const { currentStep, maxStepReached, goToStep } = useMultiPageFormContext();
 
   return (
     <Stepper
       steps={steps}
       currentStep={currentStep}
+      maxStepReached={maxStepReached}
       onStepClick={goToStep}
       className={className}
     />
