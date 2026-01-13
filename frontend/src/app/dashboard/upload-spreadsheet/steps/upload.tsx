@@ -8,12 +8,12 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import FileUpload from "@/components/ui/file-upload";
 import { useUploadCSV } from "@/api/hooks/csv/use-upload-csv";
 import { toast } from "sonner";
+import { useMultiPageFormContext } from "@/components/dashboard/multi-page-form";
 
 const uploadFormSchema = z.object({
   file: z
@@ -28,9 +28,13 @@ const uploadFormSchema = z.object({
 
 type UploadFormValues = z.infer<typeof uploadFormSchema>;
 
+interface UploadSpreadsheetData {
+  jobId?: string;
+}
+
 export const Upload = () => {
   const { mutate: uploadCSV, isPending } = useUploadCSV();
-
+  const multiPageForm = useMultiPageFormContext<UploadSpreadsheetData>();
   const form = useForm<UploadFormValues>({
     resolver: zodResolver(uploadFormSchema),
   });
@@ -39,9 +43,11 @@ export const Upload = () => {
     uploadCSV(
       { file: data.file },
       {
-        onSuccess: () => {
+        onSuccess: (response) => {
           toast.success("CSV uploaded successfully");
           form.reset();
+          multiPageForm.setData({ jobId: response.jobId });
+          multiPageForm.next();
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
@@ -52,46 +58,47 @@ export const Upload = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-1 flex-col">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Upload CSV file
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          Upload a CSV file containing your order data
-        </p>
+    <div className="flex h-full w-full flex-1 flex-col items-center justify-center">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Upload CSV file
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Upload a CSV file containing your order data
+          </p>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="file"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <FileUpload
+                      accept="text/csv,.csv"
+                      value={field.value || null}
+                      onChange={(file) => field.onChange(file)}
+                      disabled={isPending}
+                      className="min-h-48"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-center">
+                    Select a CSV file to upload (max 10MB)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" disabled={isPending} className="w-full">
+              {isPending ? "Uploading..." : "Upload CSV"}
+            </Button>
+          </form>
+        </Form>
       </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="file"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CSV file</FormLabel>
-                <FormControl>
-                  <FileUpload
-                    accept="text/csv,.csv"
-                    value={field.value || null}
-                    onChange={(file) => field.onChange(file)}
-                    disabled={isPending}
-                    className="min-h-50"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Select a CSV file to upload (max 10MB)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? "Uploading..." : "Upload CSV"}
-          </Button>
-        </form>
-      </Form>
     </div>
   );
 };

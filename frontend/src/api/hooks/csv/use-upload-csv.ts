@@ -7,16 +7,25 @@ interface UploadCSVParams {
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;
 }
 
+interface UploadCSVResponse {
+  message: string;
+  jobId: string;
+}
+
 const uploadCSV = async ({ file, onUploadProgress }: UploadCSVParams) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await api.post("/orders/upload/", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
+  const response = await api.post<UploadCSVResponse>(
+    "/orders/upload/",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress,
     },
-    onUploadProgress,
-  });
+  );
 
   return response.data;
 };

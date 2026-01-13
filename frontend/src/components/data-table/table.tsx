@@ -405,7 +405,7 @@ export function DataTable<TData>({
             <SelectTrigger className="h-8 w-20">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent side="top">
+            <SelectContent position="popper" side="top">
               {[20, 50, 100, 200, 500].map((size) => (
                 <SelectItem key={size} value={size.toString()}>
                   {size}

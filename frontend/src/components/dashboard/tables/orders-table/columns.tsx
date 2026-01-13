@@ -1,5 +1,7 @@
 import type { Order } from "@/api/types/orders";
 import type { ColumnDef } from "@tanstack/react-table";
+import { convertOzToLbsOz } from "@/lib/utils";
+import { ActionsCell } from "./actions";
 
 export const ordersColumns: ColumnDef<Order>[] = [
   {
@@ -7,7 +9,7 @@ export const ordersColumns: ColumnDef<Order>[] = [
     header: "Order ID",
     size: 100,
     cell: ({ row }) => (
-      <div className="font-medium">#{row.original.id}</div>
+      <div className="pt-0.5 font-mono">{row.original.id}</div>
     ),
   },
   {
@@ -44,7 +46,9 @@ export const ordersColumns: ColumnDef<Order>[] = [
       const { fromAddress } = row.original;
       return (
         <div className="text-sm">
-          <div>{fromAddress.city}, {fromAddress.state}</div>
+          <div>
+            {fromAddress.city}, {fromAddress.state}
+          </div>
           <div className="text-muted-foreground">{fromAddress.zipCode}</div>
         </div>
       );
@@ -58,7 +62,9 @@ export const ordersColumns: ColumnDef<Order>[] = [
       const { toAddress } = row.original;
       return (
         <div className="text-sm">
-          <div>{toAddress.city}, {toAddress.state}</div>
+          <div>
+            {toAddress.city}, {toAddress.state}
+          </div>
           <div className="text-muted-foreground">{toAddress.zipCode}</div>
         </div>
       );
@@ -70,10 +76,17 @@ export const ordersColumns: ColumnDef<Order>[] = [
     size: 150,
     cell: ({ row }) => {
       const { package: pkg } = row.original;
+      const weight = convertOzToLbsOz(pkg.weight);
+      const weightDisplay =
+        weight.lbs === 0
+          ? `${weight.oz} oz`
+          : `${weight.lbs} lbs ${weight.oz} oz`;
       return (
         <div className="text-sm">
-          <div>{pkg.length}" × {pkg.width}" × {pkg.height}"</div>
-          <div className="text-muted-foreground">{pkg.weight} oz</div>
+          <div>
+            {pkg.length}" × {pkg.width}" × {pkg.height}"
+          </div>
+          <div className="text-muted-foreground">{weightDisplay}</div>
         </div>
       );
     },
@@ -94,5 +107,11 @@ export const ordersColumns: ColumnDef<Order>[] = [
         </div>
       );
     },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    size: 80,
+    cell: ({ row }) => <ActionsCell order={row.original} />,
   },
 ];
