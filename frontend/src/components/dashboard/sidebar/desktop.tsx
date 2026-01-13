@@ -1,5 +1,6 @@
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { AnimatePresence, motion } from "motion/react";
+import React from "react";
 import { TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import { NavLink } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,6 @@ export const DesktopSidebar = () => {
         {LINKS.map((link) => {
           const linkElement = (
             <NavLink
-              key={link.label}
               to={link.href}
               end={link.end}
               target={link.openInNewTab ? "_blank" : "_self"}
@@ -101,7 +101,9 @@ export const DesktopSidebar = () => {
             );
           }
 
-          return linkElement;
+          return (
+            <React.Fragment key={link.label}>{linkElement}</React.Fragment>
+          );
         })}
       </div>
     </div>
