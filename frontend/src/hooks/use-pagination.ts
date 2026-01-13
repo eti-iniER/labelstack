@@ -16,12 +16,12 @@ export function usePagination({
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
-  const pagination: PaginationParams = {
+  const params: PaginationParams = {
     page: currentPage,
     pageSize,
   };
 
-  const debouncedPagination = useDebounce(pagination, debounceDuration);
+  const debouncedParams = useDebounce(params, debounceDuration);
 
   const setPage = (page: number) => setCurrentPage(page);
 
@@ -31,8 +31,8 @@ export function usePagination({
   };
 
   return {
-    pagination,
-    debouncedPagination,
+    params,
+    debouncedParams,
     setPage,
     setSize,
   };
