@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -8,7 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import type {
+  ColumnDef,
+  RowSelectionState,
+  SortingState,
+} from "@tanstack/react-table";
 import {
   flexRender,
   getCoreRowModel,
@@ -16,8 +19,31 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type HTMLProps } from "react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+
+function IndeterminateCheckbox({
+  indeterminate,
+  className = "",
+  ...rest
+}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+  const ref = useRef<HTMLInputElement>(null!);
+
+  useEffect(() => {
+    if (typeof indeterminate === "boolean") {
+      ref.current.indeterminate = !rest.checked && indeterminate;
+    }
+  }, [ref, indeterminate, rest.checked]);
+
+  return (
+    <input
+      type="checkbox"
+      ref={ref}
+      className={cn("accent-primary size-4 cursor-pointer", className)}
+      {...rest}
+    />
+  );
+}
 
 export type DataTableOptions<TData> = Partial<{
   className: string;
@@ -59,57 +85,80 @@ export function DataTable<TData>({
     useAvailableHeight = false,
     totalCount = data.length,
     currentPage = 1,
-    pageSize = 10,
+    pageSize = 50,
     onPageChange = () => {},
     onPageSizeChange = () => {},
     showSerialNumbers = false,
     fixedHeader = false,
     rowSkeleton,
-    rowSkeletonCount = 5,
+    rowSkeletonCount = 20,
     selectable = false,
     selectedPropertyKey = "id",
     onSelectionChange = () => {},
   } = options;
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  const checkboxColumn: ColumnDef<TData> = {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    size: 50,
-    enableSorting: false,
-  };
+  useEffect(() => {
+    if (selectable) {
+      const selectedIds = Object.keys(rowSelection).filter(
+        (key) => rowSelection[key],
+      );
+      onSelectionChange(selectedIds);
+    }
+  }, [rowSelection, selectable, onSelectionChange]);
 
-  const serialNumberColumn: ColumnDef<TData> = {
-    id: "serial",
-    header: "#",
-    size: 50,
-    enableSorting: false,
-    cell: ({ row }) => {
-      const serialNumber = (currentPage - 1) * pageSize + row.index + 1;
-      return <div className="text-sm text-gray-600">{serialNumber}.</div>;
-    },
-  };
+  const allColumns = useMemo<ColumnDef<TData>[]>(() => {
+    const checkboxColumn: ColumnDef<TData> = {
+      id: "select",
+      header: ({ table }) => (
+        <IndeterminateCheckbox
+          checked={table.getIsAllRowsSelected()}
+          indeterminate={table.getIsSomeRowsSelected()}
+          onChange={table.getToggleAllRowsSelectedHandler()}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <IndeterminateCheckbox
+          checked={row.getIsSelected()}
+          disabled={!row.getCanSelect()}
+          indeterminate={row.getIsSomeSelected()}
+          onChange={row.getToggleSelectedHandler()}
+          aria-label="Select row"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+      size: 50,
+      enableSorting: false,
+    };
 
-  const allColumns = [
-    ...(selectable ? [checkboxColumn] : []),
-    ...(showSerialNumbers ? [serialNumberColumn] : []),
-    ...columns,
-    ...(actionsColumn ? [actionsColumn] : []),
-  ];
+    const serialNumberColumn: ColumnDef<TData> = {
+      id: "serial",
+      header: "#",
+      size: 50,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const serialNumber = (currentPage - 1) * pageSize + row.index + 1;
+        return <div className="text-sm text-neutral-600">{serialNumber}.</div>;
+      },
+    };
+
+    return [
+      ...(selectable ? [checkboxColumn] : []),
+      ...(showSerialNumbers ? [serialNumberColumn] : []),
+      ...columns,
+      ...(actionsColumn ? [actionsColumn] : []),
+    ];
+  }, [
+    columns,
+    selectable,
+    showSerialNumbers,
+    actionsColumn,
+    currentPage,
+    pageSize,
+  ]);
 
   const table = useReactTable({
     data,
@@ -117,18 +166,7 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
-    onRowSelectionChange: (updater) => {
-      const newSelection =
-        typeof updater === "function" ? updater(rowSelection) : updater;
-      setRowSelection(newSelection);
-
-      if (selectable) {
-        const selectedIds = Object.keys(newSelection).filter(
-          (key) => newSelection[key],
-        );
-        onSelectionChange(selectedIds);
-      }
-    },
+    onRowSelectionChange: setRowSelection,
     state: { sorting, rowSelection },
     manualPagination: true,
     pageCount: Math.ceil(totalCount / pageSize),
@@ -139,13 +177,21 @@ export function DataTable<TData>({
       : undefined,
   });
   const { rows } = table.getRowModel();
-  const parentRef = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 60,
-    overscan: 5,
+    overscan: 20,
   });
+
+  useEffect(() => {
+    table.resetRowSelection(true);
+  }, [data, table]);
+
+  useEffect(() => {
+    virtualizer.scrollToOffset(0);
+  }, [currentPage, data, virtualizer]);
+
   const totalPages = Math.ceil(totalCount / pageSize);
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalCount);
@@ -189,7 +235,7 @@ export function DataTable<TData>({
               >
                 <div
                   className={cn(
-                    "flex w-full items-center border-b bg-gray-50",
+                    "flex w-full items-center border-b bg-neutral-200",
                     fixedHeader && "sticky",
                   )}
                   style={{
@@ -205,7 +251,7 @@ export function DataTable<TData>({
                     headerGroup.headers.map((header) => (
                       <div
                         key={header.id}
-                        className="flex items-center bg-gray-50 p-2 text-sm font-medium text-gray-700"
+                        className="flex items-center p-2 text-sm font-semibold text-neutral-900"
                         style={{
                           width: `${header.getSize()}px`,
                           minWidth: `${header.getSize()}px`,
@@ -246,7 +292,7 @@ export function DataTable<TData>({
                   useAvailableHeight ? "h-full" : "h-32",
                 )}
               >
-                <div className="text-gray-600">Loading...</div>
+                <div className="text-neutral-600">Loading...</div>
               </div>
             )
           ) : rows.length === 0 ? (
@@ -256,7 +302,9 @@ export function DataTable<TData>({
                 useAvailableHeight ? "h-full" : "h-48",
               )}
             >
-              <div className="text-sm text-gray-500 italic">No data found</div>
+              <div className="text-sm text-neutral-500 italic">
+                No data found
+              </div>
             </div>
           ) : (
             <div
@@ -268,7 +316,7 @@ export function DataTable<TData>({
             >
               <div
                 className={cn(
-                  "flex w-full items-center border-b bg-gray-50",
+                  "flex w-full items-center border-b bg-neutral-200",
                   fixedHeader && "sticky",
                 )}
                 style={{
@@ -284,7 +332,7 @@ export function DataTable<TData>({
                   headerGroup.headers.map((header) => (
                     <div
                       key={header.id}
-                      className="flex items-center bg-gray-50 p-2 text-sm font-medium text-gray-700"
+                      className="flex items-center p-2 text-sm font-semibold text-neutral-900"
                       style={{
                         width: `${header.getSize()}px`,
                         minWidth: `${header.getSize()}px`,
@@ -307,13 +355,18 @@ export function DataTable<TData>({
                   <div
                     key={row.id}
                     className={cn(
-                      "absolute left-0 flex w-full border-b bg-white transition-colors hover:bg-gray-50",
+                      "absolute left-0 flex w-full border-b transition-colors",
                       onRowClick && "cursor-pointer",
+                      virtualRow.index % 2 === 0 ? "bg-white" : "bg-neutral-50",
+                      row.getIsSelected()
+                        ? "hover:bg-blue-150! bg-blue-100!"
+                        : "hover:bg-blue-50",
                     )}
                     style={{
                       height: `${virtualRow.size}px`,
                       transform: `translateY(${virtualRow.start + (fixedHeader ? 0 : 60)}px)`,
                       minWidth: "fit-content",
+                      willChange: "transform",
                     }}
                     onClick={() => onRowClick?.(row.original)}
                   >
@@ -342,27 +395,27 @@ export function DataTable<TData>({
       </div>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-neutral-600">
             Showing {startItem} to {endItem} of {totalCount} results
           </p>
           <Select
             value={pageSize.toString()}
             onValueChange={(v) => onPageSizeChange(Number(v))}
           >
-            <SelectTrigger className="h-8 w-17.5">
+            <SelectTrigger className="h-8 w-20">
               <SelectValue />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((size) => (
+              {[20, 50, 100, 200, 500].map((size) => (
                 <SelectItem key={size} value={size.toString()}>
                   {size}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <span className="text-sm text-gray-600">per page</span>
+          <span className="text-sm text-neutral-600">per page</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 select-none">
           <Button
             variant="outline"
             size="sm"
@@ -372,10 +425,10 @@ export function DataTable<TData>({
             <LuChevronLeft className="h-4 w-4" /> Previous
           </Button>
           <div className="flex items-center space-x-1">
-            <span className="text-sm text-gray-600">Page</span>
-            <span className="text-sm font-medium">
-              {currentPage} of {totalPages}
-            </span>
+            <span className="text-sm text-neutral-600">Page</span>
+            <span className="text-sm font-medium">{currentPage}</span>
+            <span className="text-sm text-neutral-600">of</span>
+            <span className="text-sm font-medium">{totalPages}</span>
           </div>
           <Button
             variant="outline"

@@ -7,6 +7,7 @@ import { RootLayout } from "@/layouts/root";
 import { DashboardLayout } from "@/layouts/dashboard";
 import { UploadSpreadsheet } from "@/app/dashboard/upload-spreadsheet";
 import { Dashboard } from "@/app/dashboard";
+import { Orders } from "@/app/dashboard/orders";
 
 const AppRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AppRoutes = () => {
         <Route index element={<Home />} />
         <Route path="dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="orders" element={<Orders />} />
           <Route path="upload-spreadsheet" element={<UploadSpreadsheet />} />
         </Route>
       </Route>
