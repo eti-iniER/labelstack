@@ -8,6 +8,7 @@ import { DashboardLayout } from "@/layouts/dashboard";
 import { UploadSpreadsheet } from "@/app/dashboard/upload-spreadsheet";
 import { Dashboard } from "@/app/dashboard";
 import { Orders } from "@/app/dashboard/orders";
+import { PageNotFound } from "@/app/error-pages/page-not-found";
 
 const AppRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const AppRoutes = () => {
           <Route path="orders" element={<Orders />} />
           <Route path="upload-spreadsheet" element={<UploadSpreadsheet />} />
         </Route>
+        <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
   );
