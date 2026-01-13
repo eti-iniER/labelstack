@@ -4,6 +4,7 @@ from typing import List, Tuple
 from django.core.files.uploadedfile import UploadedFile
 from core.models import Order, OrderParty, Package, Address
 from core.utils import lbs_oz_to_oz
+from uuid import uuid4
 
 VALID_CSV_HEADERS = [
     "from_first_name",
@@ -164,6 +165,7 @@ class CSVService:
         """
         Create Order instances from the validated CSV data.
         """
+        job_id = uuid4()
         from_addresses = []
         to_addresses = []
         senders = []
@@ -240,6 +242,7 @@ class CSVService:
         for i, row in enumerate(self.df.iter_rows(named=True)):
             orders.append(
                 Order(
+                    job_id=job_id,
                     sender=senders[i],
                     recipient=recipients[i],
                     from_address=from_addresses[i],

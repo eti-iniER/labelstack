@@ -19,6 +19,7 @@ from api.serializers import (
     SimpleResponseSerializer,
     ErrorResponseSerializer,
     CSVUploadSerializer,
+    UploadResponseSerializer,
 )
 from core.services.csv_service import CSVService
 from core.exceptions import AppException, ErrorCode
@@ -97,7 +98,7 @@ class ShippingProviderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin
             }
         },
         responses={
-            status.HTTP_201_CREATED: SimpleResponseSerializer,
+            status.HTTP_201_CREATED: UploadResponseSerializer,
             status.HTTP_400_BAD_REQUEST: ErrorResponseSerializer,
         },
     ),
@@ -116,6 +117,7 @@ class OrderViewSet(ModelViewSet):
         "to_address__address",
         "to_address_2__name",
         "to_address_2__address",
+        "job_id",
     ]
 
     def get_serializer_class(self):
@@ -221,8 +223,8 @@ class OrderViewSet(ModelViewSet):
 
         return Response(
             {
-                "message": f"Successfully created {len(orders)} order(s)",
-                "info": {"order_count": len(orders)},
+                "message": f"Successfully uploaded {len(orders)} order(s).",
+                "job_id": orders[0].job_id if orders else None,
             },
             status=status.HTTP_201_CREATED,
         )

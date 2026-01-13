@@ -6,6 +6,7 @@ import type { ShippingProvider } from "@/api/types/shipping-provider";
 
 export interface Order {
   id: number;
+  jobId: string | null;
   sender: OrderParty;
   recipient: OrderParty;
   fromAddress: Address;
@@ -20,4 +21,5 @@ export type OrderFilters = Partial<{
   recipientName: string;
   fromAddress: string;
   toAddress: string;
+  jobId: string;
 }>;

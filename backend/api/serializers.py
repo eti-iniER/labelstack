@@ -68,6 +68,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             "id",
+            "job_id",
             "sender",
             "recipient",
             "from_address",
@@ -96,6 +97,11 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
 class SimpleResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     info = serializers.JSONField(required=False, allow_null=True)
+
+
+class UploadResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    job_id = serializers.UUIDField()
 
 
 class ErrorResponseSerializer(serializers.Serializer):

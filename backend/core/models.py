@@ -51,6 +51,7 @@ class ShippingProvider(models.Model):
 
 
 class Order(models.Model):
+    job_id = models.UUIDField(editable=False, blank=True, null=True)
     sender = models.ForeignKey(
         "OrderParty", related_name="sent_orders", on_delete=models.CASCADE
     )
