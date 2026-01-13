@@ -28,7 +28,7 @@ function App() {
   return (
     <QueryClientProvider client={client}>
       <TooltipProvider>
-        <Toaster position="top-right" />
+        <Toaster position="top-right" richColors />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
