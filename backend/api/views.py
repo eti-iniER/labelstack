@@ -21,6 +21,7 @@ from api.serializers import (
     CSVUploadSerializer,
     UploadResponseSerializer,
 )
+from api.filters import OrderFilter
 from core.services.csv_service import CSVService
 from core.exceptions import AppException, ErrorCode
 
@@ -104,21 +105,9 @@ class ShippingProviderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin
     ),
 )
 class OrderViewSet(ModelViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.objects.all().order_by("id")
     serializer_class = OrderSerializer
-    search_fields = [
-        "recipient__first_name",
-        "recipient__last_name",
-        "from_address__name",
-        "from_address__address",
-        "from_address_2__name",
-        "from_address_2__address",
-        "to_address__name",
-        "to_address__address",
-        "to_address_2__name",
-        "to_address_2__address",
-        "job_id",
-    ]
+    filterset_class = OrderFilter
 
     def get_serializer_class(self):
         if self.action == "batch_update_address":
