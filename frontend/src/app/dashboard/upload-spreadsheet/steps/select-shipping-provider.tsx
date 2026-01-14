@@ -11,7 +11,7 @@ export const SelectShippingProvider = () => {
   const pagination = usePagination();
   const { data: orders, isPending } = useOrders({
     filters: {
-      jobId: multiPageForm.data.jobId,
+      job: multiPageForm.data.job,
     },
     pagination: pagination.params,
   });

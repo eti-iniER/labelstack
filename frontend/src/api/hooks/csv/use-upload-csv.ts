@@ -9,7 +9,7 @@ interface UploadCSVParams {
 
 interface UploadCSVResponse {
   message: string;
-  jobId: string;
+  job: number;
 }
 
 const uploadCSV = async ({ file, onUploadProgress }: UploadCSVParams) => {

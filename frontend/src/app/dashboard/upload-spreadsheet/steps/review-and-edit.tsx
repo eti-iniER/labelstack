@@ -14,7 +14,7 @@ export const ReviewAndEdit = () => {
   const { filters, debouncedFilters, setFilter, resetFilters } =
     useFilters<OrderFilters>(
       {
-        jobId: multiPageForm.data.jobId,
+        job: multiPageForm.data.job,
       },
       {
         debounceDuration: 300,

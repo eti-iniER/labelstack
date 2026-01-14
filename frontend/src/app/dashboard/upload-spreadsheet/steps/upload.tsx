@@ -29,7 +29,7 @@ const uploadFormSchema = z.object({
 type UploadFormValues = z.infer<typeof uploadFormSchema>;
 
 interface UploadSpreadsheetData {
-  jobId?: string;
+  job?: number;
 }
 
 export const Upload = () => {
@@ -46,7 +46,7 @@ export const Upload = () => {
         onSuccess: (response) => {
           toast.success("CSV uploaded successfully");
           form.reset();
-          multiPageForm.setData({ jobId: response.jobId });
+          multiPageForm.setData({ job: response.job });
           multiPageForm.next();
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

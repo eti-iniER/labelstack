@@ -72,12 +72,13 @@ class OrderSerializer(serializers.ModelSerializer):
     to_address = AddressSerializer()
     package = PackageSerializer()
     shipping_provider = ShippingProviderSerializer()
+    job = serializers.PrimaryKeyRelatedField(read_only=True, allow_null=True)
 
     class Meta:
         model = Order
         fields = (
             "id",
-            "job_id",
+            "job",
             "sender",
             "recipient",
             "from_address",
@@ -110,7 +111,7 @@ class SimpleResponseSerializer(serializers.Serializer):
 
 class UploadResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
-    job_id = serializers.UUIDField()
+    job = serializers.IntegerField(required=False, allow_null=True)
 
 
 class ErrorResponseSerializer(serializers.Serializer):

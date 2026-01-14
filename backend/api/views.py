@@ -235,7 +235,7 @@ class OrderViewSet(ModelViewSet):
         return Response(
             {
                 "message": f"Successfully uploaded {len(orders)} order(s).",
-                "job_id": orders[0].job_id if orders else None,
+                "job": orders[0].job.id if orders else None,
             },
             status=status.HTTP_201_CREATED,
         )

@@ -1,6 +1,7 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from core.querysets import OrderQuerySet, AddressQuerySet, PackageQuerySet
+from uuid import uuid4
 
 # Create your models here.
 
@@ -50,8 +51,14 @@ class ShippingProvider(models.Model):
     cost_per_pound = models.DecimalField(max_digits=10, decimal_places=2)
 
 
+class Job(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Order(models.Model):
-    job_id = models.UUIDField(editable=False, blank=True, null=True)
+    job = models.ForeignKey(
+        "Job", related_name="orders", on_delete=models.CASCADE, null=True
+    )
     sender = models.ForeignKey(
         "OrderParty", related_name="sent_orders", on_delete=models.CASCADE
     )

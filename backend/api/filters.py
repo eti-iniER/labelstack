@@ -15,7 +15,7 @@ class OrderFilter(django_filters.FilterSet):
     to_address = django_filters.CharFilter(
         field_name="to_address__address", lookup_expr="icontains"
     )
-    job_id = django_filters.CharFilter(field_name="job_id", lookup_expr="exact")
+    job = django_filters.NumberFilter(field_name="job__id", lookup_expr="exact")
 
     class Meta:
         model = Order
@@ -24,7 +24,7 @@ class OrderFilter(django_filters.FilterSet):
             "recipient_name",
             "from_address",
             "to_address",
-            "job_id",
+            "job",
         ]
 
 
