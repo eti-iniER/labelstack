@@ -22,6 +22,13 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef, useState, type HTMLProps } from "react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
+export type BatchAction<TData = unknown> = {
+  id: string;
+  label: string;
+  onSelect: (selectedRows: TData[]) => void;
+  isDestructive?: boolean;
+};
+
 function IndeterminateCheckbox({
   indeterminate,
   className = "",
@@ -61,8 +68,8 @@ export type DataTableOptions<TData> = Partial<{
   rowSkeletonCount: number;
   selectable: boolean;
   selectedPropertyKey: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSelectionChange: (selectedValues: any[]) => void;
+  onSelectionChange: (selectedRows: TData[]) => void;
+  batchActions: BatchAction<TData>[];
 }>;
 
 export interface DataTableProps<TData> {
@@ -95,19 +102,12 @@ export function DataTable<TData>({
     selectable = false,
     selectedPropertyKey = "id",
     onSelectionChange = () => {},
+    batchActions = [],
   } = options;
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [selectedBatchAction, setSelectedBatchAction] = useState<string>("");
   const parentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (selectable) {
-      const selectedIds = Object.keys(rowSelection).filter(
-        (key) => rowSelection[key],
-      );
-      onSelectionChange(selectedIds);
-    }
-  }, [rowSelection, selectable, onSelectionChange]);
 
   const allColumns = useMemo<ColumnDef<TData>[]>(() => {
     const checkboxColumn: ColumnDef<TData> = {
@@ -183,6 +183,15 @@ export function DataTable<TData>({
     estimateSize: () => 60,
     overscan: 20,
   });
+
+  useEffect(() => {
+    if (selectable) {
+      const selectedRows = table
+        .getSelectedRowModel()
+        .rows.map((row) => row.original);
+      onSelectionChange(selectedRows);
+    }
+  }, [rowSelection, selectable, onSelectionChange, table]);
 
   useEffect(() => {
     table.resetRowSelection(true);
@@ -414,6 +423,56 @@ export function DataTable<TData>({
             </SelectContent>
           </Select>
           <span className="text-sm text-neutral-600">per page</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          {selectable && table.getSelectedRowModel().rows.length > 0 && (
+            <>
+              <p className="text-sm font-medium text-neutral-700">
+                {table.getSelectedRowModel().rows.length} selected
+              </p>
+              {batchActions.length > 0 && (
+                <>
+                  <Select
+                    value={selectedBatchAction}
+                    onValueChange={setSelectedBatchAction}
+                  >
+                    <SelectTrigger className="h-8 w-40">
+                      <SelectValue placeholder="Select action" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" side="top">
+                      {batchActions.map((action) => (
+                        <SelectItem key={action.id} value={action.id}>
+                          {action.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant={
+                      batchActions.find((a) => a.id === selectedBatchAction)
+                        ?.isDestructive
+                        ? "destructive"
+                        : "default"
+                    }
+                    disabled={!selectedBatchAction}
+                    onClick={() => {
+                      const action = batchActions.find(
+                        (a) => a.id === selectedBatchAction,
+                      );
+                      if (action) {
+                        const selectedRows = table
+                          .getSelectedRowModel()
+                          .rows.map((row) => row.original);
+                        action.onSelect(selectedRows);
+                      }
+                    }}
+                  >
+                    Execute
+                  </Button>
+                </>
+              )}
+            </>
+          )}
         </div>
         <div className="flex items-center space-x-2 select-none">
           <Button

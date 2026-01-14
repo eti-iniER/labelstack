@@ -1,17 +1,26 @@
 import { useUpdateAddress } from "@/api/hooks/orders/use-update-address";
 import { useUpdatePackage } from "@/api/hooks/orders/use-update-package";
+import { useDeleteOrder } from "@/api/hooks/orders/use-delete-order";
+import { useBatchUpdateAddress } from "@/api/hooks/orders/use-batch-update-address";
+import { useBatchUpdatePackage } from "@/api/hooks/orders/use-batch-update-package";
+import { useBatchDelete } from "@/api/hooks/orders/use-batch-delete";
 import type { Order } from "@/api/types/orders";
-import { DataTable } from "@/components/data-table/table";
+import { DataTable, type BatchAction } from "@/components/data-table/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/use-pagination";
 import { useModal } from "@/hooks/use-modal";
 import { ordersColumns } from "./columns";
 import { EditAddressModal } from "@/components/dashboard/modals/edit-address-modal";
 import { EditPackageModal } from "@/components/dashboard/modals/edit-package-modal";
+import { ConfirmOrderDeletionModal } from "@/components/dashboard/modals/confirm-order-deletion-modal";
+import { ConfirmBatchOrderDeletionModal } from "@/components/dashboard/modals/confirm-batch-order-deletion-modal";
+import { BatchUpdateAddressModal } from "@/components/dashboard/modals/batch-update-address-modal";
+import { BatchUpdatePackageModal } from "@/components/dashboard/modals/batch-update-package-modal";
 import type { AddressFormData } from "@/schemas/address";
 import type { PackageFormData } from "@/schemas/package";
 import { useCallback, useMemo, useState } from "react";
 import { OrdersTableContext } from "./context";
+import { toast } from "sonner";
 
 function OrderRowSkeleton() {
   return (
@@ -100,6 +109,20 @@ export function OrdersTable({
     useModal();
   const { isOpen: isPackageModalOpen, onOpenChange: setPackageModalOpen } =
     useModal();
+  const { isOpen: isDeleteModalOpen, onOpenChange: setDeleteModalOpen } =
+    useModal();
+  const {
+    isOpen: isBatchAddressModalOpen,
+    onOpenChange: setBatchAddressModalOpen,
+  } = useModal();
+  const {
+    isOpen: isBatchPackageModalOpen,
+    onOpenChange: setBatchPackageModalOpen,
+  } = useModal();
+  const {
+    isOpen: isBatchDeleteModalOpen,
+    onOpenChange: setBatchDeleteModalOpen,
+  } = useModal();
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
     null,
   );
@@ -112,9 +135,18 @@ export function OrdersTable({
   const [packageDefaultValues, setPackageDefaultValues] = useState<
     Partial<PackageFormData> | undefined
   >(undefined);
+  const [selectedOrderForDeletion, setSelectedOrderForDeletion] =
+    useState<Order | null>(null);
+  const [selectedOrdersForBatch, setSelectedOrdersForBatch] = useState<Order[]>(
+    [],
+  );
 
   const updateAddress = useUpdateAddress();
   const updatePackage = useUpdatePackage();
+  const deleteOrder = useDeleteOrder();
+  const batchUpdateAddress = useBatchUpdateAddress();
+  const batchUpdatePackage = useBatchUpdatePackage();
+  const batchDelete = useBatchDelete();
 
   const handleEditAddress = useCallback(
     (order: Order) => {
@@ -134,6 +166,25 @@ export function OrdersTable({
     [setPackageModalOpen],
   );
 
+  const handleDeleteOrder = useCallback(
+    (order: Order) => {
+      setSelectedOrderForDeletion(order);
+      setDeleteModalOpen(true);
+    },
+    [setDeleteModalOpen],
+  );
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!selectedOrderForDeletion) return;
+    deleteOrder.mutate(selectedOrderForDeletion.id, {
+      onSuccess: () => {
+        setDeleteModalOpen(false);
+        setSelectedOrderForDeletion(null);
+        toast.success("Order deleted successfully");
+      },
+    });
+  }, [selectedOrderForDeletion, deleteOrder, setDeleteModalOpen]);
+
   const handleSaveAddress = useCallback(
     (data: AddressFormData) => {
       if (!selectedAddressId) return;
@@ -142,6 +193,7 @@ export function OrdersTable({
         {
           onSuccess: () => {
             setAddressModalOpen(false);
+            toast.success("Address updated successfully");
           },
         },
       );
@@ -157,6 +209,7 @@ export function OrdersTable({
         {
           onSuccess: () => {
             setPackageModalOpen(false);
+            toast.success("Package updated successfully");
           },
         },
       );
@@ -164,12 +217,104 @@ export function OrdersTable({
     [selectedPackageId, updatePackage, setPackageModalOpen],
   );
 
+  const handleBatchUpdateAddress = useCallback(
+    (orders: Order[]) => {
+      setSelectedOrdersForBatch(orders);
+      setBatchAddressModalOpen(true);
+    },
+    [setBatchAddressModalOpen],
+  );
+
+  const handleBatchUpdatePackage = useCallback(
+    (orders: Order[]) => {
+      setSelectedOrdersForBatch(orders);
+      setBatchPackageModalOpen(true);
+    },
+    [setBatchPackageModalOpen],
+  );
+
+  const handleBatchDelete = useCallback(
+    (orders: Order[]) => {
+      setSelectedOrdersForBatch(orders);
+      setBatchDeleteModalOpen(true);
+    },
+    [setBatchDeleteModalOpen],
+  );
+
+  const handleConfirmBatchDelete = useCallback(() => {
+    const orderIds = selectedOrdersForBatch.map((order) => order.id);
+    batchDelete.mutate(orderIds, {
+      onSuccess: () => {
+        setBatchDeleteModalOpen(false);
+        setSelectedOrdersForBatch([]);
+        toast.success("Orders deleted successfully");
+      },
+    });
+  }, [selectedOrdersForBatch, batchDelete, setBatchDeleteModalOpen]);
+
+  const handleSaveBatchAddress = useCallback(
+    (addressId: number) => {
+      const orderIds = selectedOrdersForBatch.map((order) => order.id);
+      batchUpdateAddress.mutate(
+        { orderIds, addressId },
+        {
+          onSuccess: () => {
+            setBatchAddressModalOpen(false);
+            setSelectedOrdersForBatch([]);
+            toast.success("Addresses updated successfully");
+          },
+        },
+      );
+    },
+    [selectedOrdersForBatch, batchUpdateAddress, setBatchAddressModalOpen],
+  );
+
+  const handleSaveBatchPackage = useCallback(
+    (packageId: number) => {
+      const orderIds = selectedOrdersForBatch.map((order) => order.id);
+      batchUpdatePackage.mutate(
+        { orderIds, packageId },
+        {
+          onSuccess: () => {
+            setBatchPackageModalOpen(false);
+            setSelectedOrdersForBatch([]);
+            toast.success("Packages updated successfully");
+          },
+        },
+      );
+    },
+    [selectedOrdersForBatch, batchUpdatePackage, setBatchPackageModalOpen],
+  );
+
   const contextValue = useMemo(
     () => ({
       onEditAddress: handleEditAddress,
       onEditPackage: handleEditPackage,
+      onDeleteOrder: handleDeleteOrder,
     }),
-    [handleEditAddress, handleEditPackage],
+    [handleEditAddress, handleEditPackage, handleDeleteOrder],
+  );
+
+  const batchActions: BatchAction<Order>[] = useMemo(
+    () => [
+      {
+        id: "batch-update-address",
+        label: "Update address",
+        onSelect: handleBatchUpdateAddress,
+      },
+      {
+        id: "batch-update-package",
+        label: "Update package",
+        onSelect: handleBatchUpdatePackage,
+      },
+      {
+        id: "batch-delete",
+        label: "Delete orders",
+        onSelect: handleBatchDelete,
+        isDestructive: true,
+      },
+    ],
+    [handleBatchUpdateAddress, handleBatchUpdatePackage, handleBatchDelete],
   );
 
   return (
@@ -180,7 +325,6 @@ export function OrdersTable({
         isLoading={isLoading}
         options={{
           selectable: true,
-          selectedPropertyKey: "id",
           totalCount,
           currentPage: pagination.params.page,
           pageSize: pagination.params.pageSize,
@@ -190,6 +334,7 @@ export function OrdersTable({
           fixedHeader: true,
           useAvailableHeight: true,
           rowSkeleton: OrderRowSkeleton,
+          batchActions,
         }}
       />
 
@@ -208,6 +353,44 @@ export function OrdersTable({
           onOpenChange={setPackageModalOpen}
           defaultValues={packageDefaultValues}
           onSave={handleSavePackage}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <ConfirmOrderDeletionModal
+          open={isDeleteModalOpen}
+          onOpenChange={setDeleteModalOpen}
+          order={selectedOrderForDeletion}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
+
+      {isBatchAddressModalOpen && (
+        <BatchUpdateAddressModal
+          open={isBatchAddressModalOpen}
+          onOpenChange={setBatchAddressModalOpen}
+          orderCount={selectedOrdersForBatch.length}
+          onSave={handleSaveBatchAddress}
+          isSavePending={batchUpdateAddress.isPending}
+        />
+      )}
+
+      {isBatchPackageModalOpen && (
+        <BatchUpdatePackageModal
+          open={isBatchPackageModalOpen}
+          onOpenChange={setBatchPackageModalOpen}
+          orderCount={selectedOrdersForBatch.length}
+          onSave={handleSaveBatchPackage}
+          isSavePending={batchUpdatePackage.isPending}
+        />
+      )}
+
+      {isBatchDeleteModalOpen && (
+        <ConfirmBatchOrderDeletionModal
+          open={isBatchDeleteModalOpen}
+          onOpenChange={setBatchDeleteModalOpen}
+          orders={selectedOrdersForBatch}
+          onConfirm={handleConfirmBatchDelete}
         />
       )}
     </OrdersTableContext.Provider>

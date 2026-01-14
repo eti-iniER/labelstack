@@ -11,7 +11,8 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { useOrdersTableContext } from "./context";
 
 export const ActionsCell = ({ order }: { order: Order }) => {
-  const { onEditAddress, onEditPackage } = useOrdersTableContext();
+  const { onEditAddress, onEditPackage, onDeleteOrder } =
+    useOrdersTableContext();
 
   return (
     <DropdownMenu>
@@ -26,7 +27,7 @@ export const ActionsCell = ({ order }: { order: Order }) => {
             onEditAddress(order);
           }}
         >
-          Edit address
+          Edit recipient address
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
@@ -34,6 +35,14 @@ export const ActionsCell = ({ order }: { order: Order }) => {
           }}
         >
           Edit package
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            onDeleteOrder(order);
+          }}
+          className="text-destructive"
+        >
+          Delete order
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

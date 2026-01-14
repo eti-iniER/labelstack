@@ -4,6 +4,7 @@ import type { Order } from "@/api/types/orders";
 interface OrdersTableContextValue {
   onEditAddress: (order: Order) => void;
   onEditPackage: (order: Order) => void;
+  onDeleteOrder: (order: Order) => void;
 }
 
 export const OrdersTableContext = createContext<OrdersTableContextValue | null>(
