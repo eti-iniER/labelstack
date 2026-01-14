@@ -50,11 +50,19 @@ export function useMultiPageForm<TData = any>({
     [totalSteps, currentStep, maxStepReached],
   );
 
+  const reset = useCallback(() => {
+    setCurrentStep(0);
+    setDirection(1);
+    setDataState((initialData || {}) as TData);
+    setMaxStepReached(0);
+  }, [initialData]);
+
   const next = useCallback(async () => {
     if (isLastStep) {
       if (onComplete) {
         await onComplete(data);
       }
+      reset();
     } else {
       setDirection(1);
       setCurrentStep((prev) => {
@@ -63,7 +71,7 @@ export function useMultiPageForm<TData = any>({
         return nextStep;
       });
     }
-  }, [isLastStep, onComplete, data, totalSteps]);
+  }, [isLastStep, onComplete, data, totalSteps, reset]);
 
   const previous = useCallback(() => {
     setDirection(-1);
