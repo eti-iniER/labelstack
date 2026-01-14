@@ -26,7 +26,7 @@ export const ReviewAndEdit = () => {
     pagination: pagination.params,
   });
   return (
-    <div className="flex h-full w-full flex-1 flex-col gap-2">
+    <div className="flex h-full w-full flex-1 flex-col gap-2 p-2">
       <div className="flex max-w-md items-center gap-2">
         <Input
           type="text"

@@ -17,7 +17,7 @@ export const SelectShippingProvider = () => {
   });
 
   return (
-    <div className="flex h-full w-full flex-1 flex-col gap-2">
+    <div className="flex h-full w-full flex-1 flex-col gap-2 p-2">
       <SelectShippingProviderTable
         isLoading={isPending}
         totalCount={orders?.count ?? 0}
