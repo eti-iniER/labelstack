@@ -22,4 +22,5 @@ export type OrderFilters = Partial<{
   fromAddress: string;
   toAddress: string;
   jobId: string;
+  search: string;
 }>;

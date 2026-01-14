@@ -105,9 +105,29 @@ class ShippingProviderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin
     ),
 )
 class OrderViewSet(ModelViewSet):
-    queryset = Order.objects.all().order_by("id")
+    queryset = (
+        Order.objects.all()
+        .order_by("id")
+        .select_related(
+            "from_address",
+            "to_address",
+            "sender",
+            "recipient",
+            "package",
+            "shipping_provider",
+        )
+    )
     serializer_class = OrderSerializer
     filterset_class = OrderFilter
+    search_fields = [
+        "id",
+        "to_address__name",
+        "from_address__name",
+        "sender__first_name",
+        "sender__last_name",
+        "recipient__first_name",
+        "recipient__last_name",
+    ]
 
     def get_serializer_class(self):
         if self.action == "batch_update_address":
