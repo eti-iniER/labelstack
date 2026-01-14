@@ -1,6 +1,9 @@
 from rest_framework import serializers
-from core.models import Order, OrderParty, Package, Address, ShippingProvider
+from core.models import Order, OrderParty, Package, Address, ShippingProvider, Job
 from core.exceptions import ErrorCode
+from core.services.job_service import JobService
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 
 
 class BatchOrderActionSerializer(serializers.Serializer):
@@ -65,6 +68,23 @@ class ShippingProviderSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "description", "cost_per_pound")
 
 
+class JobSerializer(serializers.ModelSerializer):
+    orders = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True,
+    )
+    total_cost = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.DECIMAL)
+    def get_total_cost(self, obj: Job):
+        job_service = JobService(job=obj)
+        return job_service.get_total_cost()
+
+    class Meta:
+        model = Job
+        fields = ("id", "orders", "created_at", "total_cost")
+
+
 class OrderSerializer(serializers.ModelSerializer):
     sender = OrderPartySerializer()
     recipient = OrderPartySerializer()
@@ -112,6 +132,10 @@ class SimpleResponseSerializer(serializers.Serializer):
 class UploadResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     job = serializers.IntegerField(required=False, allow_null=True)
+
+
+class TotalCostResponseSerializer(serializers.Serializer):
+    total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)
 
 
 class ErrorResponseSerializer(serializers.Serializer):

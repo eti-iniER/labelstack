@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from core.models import Order, OrderParty, Address, Package, ShippingProvider
+from core.models import Order, OrderParty, Address, Package, ShippingProvider, Job
 from api.serializers import (
     OrderSerializer,
     OrderUpdateSerializer,
@@ -20,6 +20,7 @@ from api.serializers import (
     ErrorResponseSerializer,
     CSVUploadSerializer,
     UploadResponseSerializer,
+    JobSerializer,
 )
 from api.filters import OrderFilter, PackageFilter, AddressFilter
 from core.services.csv_service import CSVService
@@ -239,3 +240,8 @@ class OrderViewSet(ModelViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class JobViewSet(GenericViewSet, RetrieveModelMixin):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer

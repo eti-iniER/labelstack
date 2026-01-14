@@ -6,6 +6,7 @@ from api.views import (
     AddressViewSet,
     ShippingProviderViewSet,
     PackageViewSet,
+    JobViewSet,
 )
 
 app_name = "api"
@@ -17,6 +18,7 @@ router.register(r"packages", PackageViewSet, basename="packages")
 router.register(
     r"shipping-providers", ShippingProviderViewSet, basename="shipping-providers"
 )
+router.register(r"jobs", JobViewSet, basename="jobs")
 
 
 urlpatterns = [

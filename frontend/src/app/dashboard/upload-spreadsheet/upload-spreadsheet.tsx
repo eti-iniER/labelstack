@@ -11,6 +11,7 @@ import {
 } from "./steps";
 import type { StepperStep } from "@/components/dashboard/stepper";
 import type { UploadSpreadsheetData } from "@/app/dashboard/upload-spreadsheet/types";
+import { toast } from "sonner";
 
 export const UploadSpreadsheet = () => {
   const stepperSteps: StepperStep[] = [
@@ -57,8 +58,8 @@ export const UploadSpreadsheet = () => {
 
   const multiPageForm = useMultiPageForm<UploadSpreadsheetData>({
     steps: formSteps,
-    onComplete: async (data) => {
-      console.log("Form completed with data:", data);
+    onComplete: async () => {
+      toast.success("Spreadsheet upload process completed!");
     },
   });
 

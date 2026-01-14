@@ -4,7 +4,7 @@ import {
   type PaginationParams,
 } from "@/api/types/global";
 import { type Order, type OrderFilters } from "@/api/types/orders";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface UseOrdersParams {
   filters?: OrderFilters;
@@ -26,9 +26,14 @@ const getOrders = async ({
 
 export const useOrders = (params: UseOrdersParams = {}) => {
   const { filters = {}, pagination } = params;
+  const queryClient = useQueryClient();
 
   return useQuery({
     queryKey: ["orders", filters, pagination],
-    queryFn: () => getOrders(params),
+    queryFn: async () => {
+      const data = await getOrders(params);
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      return data;
+    },
   });
 };
