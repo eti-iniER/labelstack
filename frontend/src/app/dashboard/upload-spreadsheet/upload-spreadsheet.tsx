@@ -2,8 +2,13 @@ import { MultiPageForm } from "@/components/dashboard/multi-page-form";
 import type { MultiPageFormStep } from "@/components/dashboard/multi-page-form/types";
 import { useMultiPageForm } from "@/components/dashboard/multi-page-form/use-multi-page-form";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { TbEye, TbFileUpload, TbPackage } from "react-icons/tb";
-import { Upload, ReviewAndEdit } from "./steps";
+import { TbEye, TbFileUpload, TbPackage, TbShoppingCart } from "react-icons/tb";
+import {
+  Upload,
+  ReviewAndEdit,
+  SelectShippingProvider,
+  Purchase,
+} from "./steps";
 import type { StepperStep } from "@/components/dashboard/stepper";
 import type { UploadSpreadsheetData } from "@/app/dashboard/upload-spreadsheet/types";
 
@@ -24,6 +29,11 @@ export const UploadSpreadsheet = () => {
       icon: TbPackage,
       text: "Select shipping provider",
     },
+    {
+      id: "purchase",
+      icon: TbShoppingCart,
+      text: "Purchase",
+    },
   ];
 
   const formSteps: MultiPageFormStep[] = [
@@ -34,6 +44,14 @@ export const UploadSpreadsheet = () => {
     {
       id: "review-and-edit",
       component: ReviewAndEdit,
+    },
+    {
+      id: "select-shipping-provider",
+      component: SelectShippingProvider,
+    },
+    {
+      id: "purchase",
+      component: Purchase,
     },
   ];
 
