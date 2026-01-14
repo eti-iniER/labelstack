@@ -21,7 +21,7 @@ from api.serializers import (
     CSVUploadSerializer,
     UploadResponseSerializer,
 )
-from api.filters import OrderFilter
+from api.filters import OrderFilter, PackageFilter, AddressFilter
 from core.services.csv_service import CSVService
 from core.exceptions import AppException, ErrorCode
 
@@ -29,11 +29,13 @@ from core.exceptions import AppException, ErrorCode
 class AddressViewSet(ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+    filterset_class = AddressFilter
 
 
 class PackageViewSet(ModelViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
+    filterset_class = PackageFilter
 
 
 class OrderPartyViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):

@@ -13,6 +13,7 @@ export const packageSchema = z.object({
     .number<number>()
     .min(0, "Weight (lbs) cannot be negative"),
   weightOz: z.coerce.number<number>().min(0, "Weight (oz) cannot be negative"),
+  isUserCreated: z.boolean().optional(),
 });
 
 export type PackageFormData = z.infer<typeof packageSchema>;

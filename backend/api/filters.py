@@ -1,5 +1,5 @@
 import django_filters
-from core.models import Order
+from core.models import Order, Package, Address
 
 
 class OrderFilter(django_filters.FilterSet):
@@ -26,3 +26,19 @@ class OrderFilter(django_filters.FilterSet):
             "to_address",
             "job_id",
         ]
+
+
+class PackageFilter(django_filters.FilterSet):
+    is_user_created = django_filters.BooleanFilter(field_name="is_user_created")
+
+    class Meta:
+        model = Package
+        fields = ["is_user_created"]
+
+
+class AddressFilter(django_filters.FilterSet):
+    is_user_created = django_filters.BooleanFilter(field_name="is_user_created")
+
+    class Meta:
+        model = Address
+        fields = ["is_user_created"]

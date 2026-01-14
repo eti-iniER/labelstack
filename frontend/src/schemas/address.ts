@@ -7,6 +7,7 @@ export const addressSchema = z.object({
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   zipCode: z.string().min(1, "Zip code is required"),
+  isUserCreated: z.boolean().optional(),
 });
 
 export type AddressFormData = z.infer<typeof addressSchema>;

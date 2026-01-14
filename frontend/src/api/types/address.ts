@@ -7,4 +7,9 @@ export interface Address {
   state: string;
   zipCode: string;
   country: string;
+  isUserCreated: boolean;
 }
+
+export type AddressFilters = Partial<{
+  isUserCreated: boolean;
+}>;

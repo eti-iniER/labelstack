@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
 
 interface EditAddressModalProps {
@@ -58,6 +60,7 @@ export function EditAddressModal({
       city: "",
       state: "",
       zipCode: "",
+      isUserCreated: defaultValues?.isUserCreated ?? false,
       ...defaultValues,
     },
   });
@@ -171,6 +174,28 @@ export function EditAddressModal({
                     <Input placeholder="10001" {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isUserCreated"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Save address</FormLabel>
+                    <FormDescription>
+                      If this is checked, the address will be saved for future
+                      selection.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

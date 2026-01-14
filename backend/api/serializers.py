@@ -35,6 +35,7 @@ class AddressSerializer(serializers.ModelSerializer):
             "state",
             "zip_code",
             "country",
+            "is_user_created",
         )
 
 
@@ -47,7 +48,15 @@ class OrderPartySerializer(serializers.ModelSerializer):
 class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
-        fields = ("id", "length", "width", "height", "weight", "item_sku")
+        fields = (
+            "id",
+            "length",
+            "width",
+            "height",
+            "weight",
+            "item_sku",
+            "is_user_created",
+        )
 
 
 class ShippingProviderSerializer(serializers.ModelSerializer):

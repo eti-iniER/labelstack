@@ -5,4 +5,9 @@ export interface Package {
   height: number; // in inches
   weight: number; // in ounces
   itemSku: string;
+  isUserCreated: boolean;
 }
+
+export type PackageFilters = Partial<{
+  isUserCreated: boolean;
+}>;
