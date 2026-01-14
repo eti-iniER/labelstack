@@ -26,5 +26,7 @@ RUN uv sync --locked
 # Now copy the rest of the application source
 COPY . .
 
-# Ensure entrypoint is executable (if not already in repo with +x)
-RUN chmod +x /app/entrypoint.sh
+# Fix Windows line endings and ensure entrypoint is executable
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
