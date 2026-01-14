@@ -1,6 +1,6 @@
 import type { PaginationParams } from "@/api/types/global";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 interface UsePaginationOptions {
   initialPage?: number;
@@ -16,10 +16,13 @@ export function usePagination({
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
-  const params: PaginationParams = {
-    page: currentPage,
-    pageSize,
-  };
+  const params: PaginationParams = useMemo(
+    () => ({
+      page: currentPage,
+      pageSize,
+    }),
+    [currentPage, pageSize],
+  );
 
   const debouncedParams = useDebounce(params, debounceDuration);
 
