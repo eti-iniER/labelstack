@@ -45,23 +45,25 @@ export function MultiPageForm<TData = any>({
             <ConnectedStepper steps={stepperSteps} />
           </div>
         )}
-        <AnimatePresence mode="wait" custom={form.direction}>
-          <motion.div
-            key={form.currentStep}
-            custom={form.direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="flex min-h-0 flex-1 flex-col"
-          >
-            <CurrentStepComponent />
-          </motion.div>
-        </AnimatePresence>
+        <div className="relative flex min-h-0 flex-1 overflow-hidden">
+          <AnimatePresence mode="popLayout" custom={form.direction}>
+            <motion.div
+              key={form.currentStep}
+              custom={form.direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.25 },
+              }}
+              className="absolute inset-0 flex flex-col"
+            >
+              <CurrentStepComponent />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </MultiPageFormProvider>
   );
