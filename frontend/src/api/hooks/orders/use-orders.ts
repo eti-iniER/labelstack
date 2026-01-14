@@ -24,12 +24,11 @@ const getOrders = async ({
   return response.data;
 };
 
-export const useOrders = (
-  params: UseOrdersParams = {},
-  filters: OrderFilters = {},
-) => {
+export const useOrders = (params: UseOrdersParams = {}) => {
+  const { filters = {}, pagination } = params;
+
   return useQuery({
-    queryKey: ["orders", filters, params],
+    queryKey: ["orders", filters, pagination],
     queryFn: () => getOrders(params),
   });
 };
