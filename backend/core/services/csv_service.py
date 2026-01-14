@@ -2,7 +2,7 @@ import abc
 import polars as pl
 from typing import List, Tuple
 from django.core.files.uploadedfile import UploadedFile
-from core.models import Order, OrderParty, Package, Address, Job
+from core.models import Order, OrderParty, Package, Address, Job, ShippingProvider
 from core.utils import lbs_oz_to_oz
 from uuid import uuid4
 
@@ -166,6 +166,9 @@ class CSVService:
         Create Order instances from the validated CSV data.
         """
         job = Job.objects.create()
+        shipping_provider = ShippingProvider.objects.get(
+            id=2
+        )  # Ground shipping, default for CSV uploads
         from_addresses = []
         to_addresses = []
         senders = []
@@ -243,6 +246,7 @@ class CSVService:
             orders.append(
                 Order(
                     job=job,
+                    shipping_provider=shipping_provider,
                     sender=senders[i],
                     recipient=recipients[i],
                     from_address=from_addresses[i],

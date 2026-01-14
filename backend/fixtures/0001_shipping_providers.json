@@ -1,0 +1,1 @@
+[{"model": "core.shippingprovider", "pk": 1, "fields": {"name": "Priority Mail", "description": "Faster delivery", "cost_per_pound": "4.00"}}, {"model": "core.shippingprovider", "pk": 2, "fields": {"name": "Ground Shipping", "description": "Economy option", "cost_per_pound": "2.00"}}]
