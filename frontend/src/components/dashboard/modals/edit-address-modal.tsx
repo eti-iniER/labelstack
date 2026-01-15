@@ -73,7 +73,7 @@ export function EditAddressModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit recipient address</DialogTitle>
+          <DialogTitle>Edit sender address</DialogTitle>
           <DialogDescription className="sr-only">
             Use the form below to edit the address details.
           </DialogDescription>

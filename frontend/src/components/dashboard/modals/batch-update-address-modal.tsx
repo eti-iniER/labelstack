@@ -65,9 +65,9 @@ export function BatchUpdateAddressModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Batch update address</DialogTitle>
+          <DialogTitle>Batch update sender address</DialogTitle>
           <DialogDescription>
-            Update the address for {orderCount} selected order
+            Update the sender address for {orderCount} selected order
             {orderCount > 1 ? "s" : ""}.
           </DialogDescription>
         </DialogHeader>

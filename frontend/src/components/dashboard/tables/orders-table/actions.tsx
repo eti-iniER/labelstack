@@ -27,7 +27,7 @@ export const ActionsCell = ({ order }: { order: Order }) => {
             onEditAddress(order);
           }}
         >
-          Edit recipient address
+          Edit sender address
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {

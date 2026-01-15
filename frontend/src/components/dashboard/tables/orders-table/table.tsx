@@ -299,7 +299,7 @@ export function OrdersTable({
     () => [
       {
         id: "batch-update-address",
-        label: "Update address",
+        label: "Update sender address",
         onSelect: handleBatchUpdateAddress,
       },
       {
