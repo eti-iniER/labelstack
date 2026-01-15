@@ -15,6 +15,7 @@ import { useUploadCSV } from "@/api/hooks/csv/use-upload-csv";
 import { toast } from "sonner";
 import { useMultiPageFormContext } from "@/components/dashboard/multi-page-form";
 import { getErrorInfo } from "@/lib/errors";
+import { TbArrowLeft, TbArrowRight } from "react-icons/tb";
 
 const uploadFormSchema = z.object({
   file: z
@@ -36,6 +37,7 @@ interface UploadSpreadsheetData {
 export const Upload = () => {
   const { mutate: uploadCSV, isPending } = useUploadCSV();
   const multiPageForm = useMultiPageFormContext<UploadSpreadsheetData>();
+  const hasExistingJob = multiPageForm.data.job !== undefined;
   const form = useForm<UploadFormValues>({
     resolver: zodResolver(uploadFormSchema),
   });
@@ -102,6 +104,25 @@ export const Upload = () => {
             </Button>
           </form>
         </Form>
+
+        {hasExistingJob && (
+          <div className="space-y-3">
+            <div className="flex flex-row items-center justify-center gap-2">
+              <Button variant="outline" onClick={multiPageForm.previous}>
+                <TbArrowLeft className="size-4" />
+                Previous step
+              </Button>
+              <Button onClick={multiPageForm.next}>
+                Next step
+                <TbArrowRight className="size-4" />
+              </Button>
+            </div>
+            <p className="text-muted-foreground max-w-sm text-center text-sm">
+              Data from the last upload has been preserved and will be only be
+              overwritten on a new upload or upon completing the process.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
