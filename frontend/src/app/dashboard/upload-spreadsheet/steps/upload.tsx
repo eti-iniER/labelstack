@@ -14,6 +14,7 @@ import FileUpload from "@/components/ui/file-upload";
 import { useUploadCSV } from "@/api/hooks/csv/use-upload-csv";
 import { toast } from "sonner";
 import { useMultiPageFormContext } from "@/components/dashboard/multi-page-form";
+import { getErrorInfo } from "@/lib/errors";
 
 const uploadFormSchema = z.object({
   file: z
@@ -49,9 +50,12 @@ export const Upload = () => {
           multiPageForm.setData({ job: response.job });
           multiPageForm.next();
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onError: (error: any) => {
-          toast.error(error?.response?.data?.message || "Failed to upload CSV");
+        onError: (error) => {
+          const errorInfo = getErrorInfo(error.code);
+          console.log(errorInfo);
+          toast.error(errorInfo.message, {
+            description: errorInfo.description,
+          });
         },
       },
     );

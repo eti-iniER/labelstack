@@ -1,4 +1,5 @@
 import type { ErrorCode } from "@/api/types/errors";
+import type { APIError } from "@/lib/errors";
 
 export type ISODateString = string; // e.g. "2023-10-05T14:48:00.000Z"
 export type Money = string; // e.g. "19.99"
@@ -29,4 +30,10 @@ export interface PaginationParams {
 export interface PaginationActions {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
+}
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    defaultError: APIError;
+  }
 }

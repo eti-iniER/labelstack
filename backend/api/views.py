@@ -233,6 +233,14 @@ class OrderViewSet(ModelViewSet):
 
         orders = csv_service.create_orders()
 
+        if not csv_service.is_valid:
+            raise AppException(
+                detail="Failed to create orders from CSV",
+                code=ErrorCode.CSV_VALIDATION_ERROR,
+                info={"errors": csv_service.errors},
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
         return Response(
             {
                 "message": f"Successfully uploaded {len(orders)} order(s).",
