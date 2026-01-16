@@ -106,7 +106,7 @@ export const Upload = () => {
         </Form>
 
         {hasExistingJob && (
-          <div className="space-y-3">
+          <div className="flex flex-col items-center space-y-3">
             <div className="flex flex-row items-center justify-center gap-2">
               <Button variant="outline" onClick={multiPageForm.previous}>
                 <TbArrowLeft className="size-4" />
@@ -117,7 +117,7 @@ export const Upload = () => {
                 <TbArrowRight className="size-4" />
               </Button>
             </div>
-            <p className="text-muted-foreground max-w-sm text-center text-sm">
+            <p className="text-muted-foreground max-w-md text-center text-sm">
               Data from the last upload has been preserved and will be only be
               overwritten on a new upload or upon completing the process.
             </p>
